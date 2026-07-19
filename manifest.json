@@ -7,7 +7,8 @@
     "storage",
     "webNavigation",
     "tabs",
-    "alarms"
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "*://*.xiaohongshu.com/*"

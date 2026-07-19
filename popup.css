@@ -230,3 +230,126 @@ h1 {
   font-size: 13px;
   padding: 8px 0;
 }
+
+/* ---------- 打卡凭证（缩略图/上传按钮） ---------- */
+
+.task-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.proof-btn {
+  flex-shrink: 0;
+  background: #fff0f2;
+  color: var(--xhs-red);
+  border: 1px solid #ffd3da;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.proof-btn:hover {
+  background: #ffe0e5;
+}
+
+.undo-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
+/* ---------- 打卡截图预览遮罩 ---------- */
+
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  z-index: 10;
+}
+
+.preview-img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- 近 7 天历史 ---------- */
+
+.history-section {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.history-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 4px 0;
+}
+
+.history-toggle:hover {
+  color: var(--xhs-red);
+}
+
+.history-list {
+  list-style: none;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  background: var(--card);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.history-date {
+  color: var(--text);
+}
+
+.history-result {
+  font-weight: 600;
+}
+
+.history-result.ok {
+  color: var(--green);
+}
+
+.history-result.fail {
+  color: var(--xhs-red);
+}
+
+.history-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}

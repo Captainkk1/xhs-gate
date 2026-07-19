@@ -34,6 +34,16 @@
 
     <ul id="task-list" class="task-list"></ul>
     <p id="empty-state" class="empty-state">还没有任务，先添加今天要完成的事情吧。</p>
+
+    <section class="history-section">
+      <button id="history-toggle" class="history-toggle" type="button">近 7 天打卡记录 ▾</button>
+      <ul id="history-list" class="history-list" hidden></ul>
+    </section>
+  </div>
+
+  <!-- 预览打卡截图用的遮罩层 -->
+  <div id="preview-overlay" class="preview-overlay" hidden>
+    <img id="preview-img" class="preview-img" alt="打卡截图预览">
   </div>
 
   <script src="popup.js"></script>
