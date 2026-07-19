@@ -15,6 +15,14 @@
   padding: 0;
 }
 
+/* 必须放在所有组件样式之前，且必须带 !important：
+   浏览器默认的 [hidden] { display: none } 属于 UA 样式表，
+   会被下面 .preview-overlay / .history-list 里的 display: flex 覆盖，
+   导致 hidden 属性完全失效（遮罩层一直盖在面板上、挡住所有点击）。 */
+[hidden] {
+  display: none !important;
+}
+
 body {
   width: 340px;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",

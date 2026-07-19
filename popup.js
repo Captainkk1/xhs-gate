@@ -14,8 +14,12 @@ const el = {
   historyToggle: document.getElementById('history-toggle'),
   historyList: document.getElementById('history-list'),
   previewOverlay: document.getElementById('preview-overlay'),
-  previewImg: document.getElementById('preview-img')
+  previewImg: document.getElementById('preview-img'),
+  fileInput: document.getElementById('file-input')
 };
+
+// 当前正在等待上传截图的任务 id。
+let pendingTaskId = null;
 
 function send(message) {
   return chrome.runtime.sendMessage(message);
@@ -146,21 +150,27 @@ el.previewOverlay.addEventListener('click', () => {
 });
 
 function triggerUpload(taskId) {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.addEventListener('change', async () => {
-    const file = input.files && input.files[0];
-    if (!file) return;
-    try {
-      const dataUrl = await fileToResizedDataUrl(file);
-      render(await send({ type: 'COMPLETE_TASK', id: taskId, dataUrl }));
-    } catch (e) {
-      window.alert('截图处理失败，请重试。');
-    }
-  });
-  input.click();
+  pendingTaskId = taskId;
+  // 清空 value，保证连续给不同任务选同一张图也能触发 change。
+  el.fileInput.value = '';
+  el.fileInput.click();
 }
+
+el.fileInput.addEventListener('change', async () => {
+  const file = el.fileInput.files && el.fileInput.files[0];
+  const taskId = pendingTaskId;
+  pendingTaskId = null;
+  if (!file || !taskId) return;
+
+  try {
+    const dataUrl = await fileToResizedDataUrl(file);
+    render(await send({ type: 'COMPLETE_TASK', id: taskId, dataUrl }));
+  } catch (e) {
+    window.alert('截图处理失败，请重试。');
+  } finally {
+    el.fileInput.value = '';
+  }
+});
 
 async function addTask() {
   const text = el.taskInput.value.trim();
