@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>先完成今天的任务 · 任务解锁小红书</title>
+  <style>
+    :root {
+      --xhs-red: #ff2442;
+      --green: #22c55e;
+      --text: #1a1a1a;
+      --text-muted: #6b6b70;
+      --border: #ececef;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+        "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(160deg, #fff5f6 0%, #f7f7f8 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgba(255, 36, 66, 0.12);
+      padding: 40px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .lock-icon {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 20px;
+      display: block;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .progress-wrap {
+      background: #faf9fa;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .progress-count {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--xhs-red);
+      margin-bottom: 4px;
+    }
+
+    .progress-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--xhs-red);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    .steps {
+      text-align: left;
+      background: #fff0f2;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+
+    .steps p {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #3a3a3f;
+    }
+
+    .steps strong { color: var(--xhs-red); }
+
+    .refresh-btn {
+      background: var(--xhs-red);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .refresh-btn:hover { background: #e01f39; }
+    .refresh-btn:active { transform: scale(0.98); }
+
+    .unlocked-note {
+      color: var(--green);
+      font-weight: 600;
+      margin-top: 16px;
+      font-size: 14px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <svg class="lock-icon" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="128" height="128" rx="28" fill="#ff2442"/>
+      <path d="M44 58V46a20 20 0 0 1 40 0v12" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+      <rect x="36" y="58" width="56" height="44" rx="10" fill="#fff"/>
+      <circle cx="64" cy="76" r="6" fill="#ff2442"/>
+      <rect x="61" y="80" width="6" height="12" rx="3" fill="#ff2442"/>
+    </svg>
+
+    <h1>先完成今天的任务</h1>
+    <p class="subtitle">小红书已被暂时拦截。<br>完成设定的任务数后即可解锁访问。</p>
+
+    <div class="progress-wrap">
+      <div class="progress-count"><span id="done">0</span> / <span id="goal">0</span></div>
+      <div class="progress-label">今日已完成任务 / 目标</div>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <p>
+        1. 点击浏览器工具栏上的 <strong>「任务解锁小红书」</strong> 插件图标<br>
+        2. 添加并勾选完成今天的任务<br>
+        3. 达标后回到本页，点击下方按钮刷新即可解锁
+      </p>
+    </div>
+
+    <button id="refresh-btn" class="refresh-btn">我已完成，刷新解锁</button>
+    <p id="unlocked-note" class="unlocked-note">✓ 已达标！正在为你打开小红书…</p>
+  </div>
+
+  <script src="blocked.js"></script>
+</body>
+</html>
