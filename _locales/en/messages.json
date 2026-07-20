@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "Task Gate for Xiaohongshu",
+    "description": "Extension name shown in the browser and store."
+  },
+  "appDescription": {
+    "message": "Finish today's tasks before you can browse Xiaohongshu. Blocks the site automatically until you hit your goal.",
+    "description": "Extension description shown in the browser and store."
+  }
+}

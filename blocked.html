@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>先完成今天的任务 · 任务解锁小红书</title>
+  <title data-i18n-title-key="blockedTitle">先完成今天的任务 · 任务解锁小红书</title>
   <style>
     :root {
       --xhs-red: #ff2442;
@@ -133,6 +133,29 @@
       font-size: 14px;
       display: none;
     }
+
+    .lang-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .lang-select {
+      font-family: inherit;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -145,29 +168,31 @@
       <rect x="61" y="80" width="6" height="12" rx="3" fill="#ff2442"/>
     </svg>
 
-    <h1>先完成今天的任务</h1>
-    <p class="subtitle">小红书已被暂时拦截。<br>完成设定的任务数后即可解锁访问。</p>
+    <h1 data-i18n="blockedHeading">先完成今天的任务</h1>
+    <p class="subtitle" data-i18n-html="blockedSubtitle">小红书已被暂时拦截。<br>完成设定的任务数后即可解锁访问。</p>
 
     <div class="progress-wrap">
       <div class="progress-count"><span id="done">0</span> / <span id="goal">0</span></div>
-      <div class="progress-label">今日已完成任务 / 目标</div>
+      <div class="progress-label" data-i18n="blockedProgressLabel">今日已完成任务 / 目标</div>
       <div class="progress-bar">
         <div id="progress-fill" class="progress-fill"></div>
       </div>
     </div>
 
     <div class="steps">
-      <p>
-        1. 点击浏览器工具栏上的 <strong>「任务解锁小红书」</strong> 插件图标<br>
-        2. 添加并勾选完成今天的任务<br>
-        3. 达标后回到本页，点击下方按钮刷新即可解锁
-      </p>
+      <p data-i18n-html="blockedSteps"></p>
     </div>
 
-    <button id="refresh-btn" class="refresh-btn">我已完成，刷新解锁</button>
-    <p id="unlocked-note" class="unlocked-note">✓ 已达标！正在为你打开小红书…</p>
+    <button id="refresh-btn" class="refresh-btn" data-i18n="blockedRefreshBtn">我已完成，刷新解锁</button>
+    <p id="unlocked-note" class="unlocked-note" data-i18n="blockedUnlockedNote">✓ 已达标！正在为你打开小红书…</p>
+
+    <div class="lang-row">
+      <label for="lang-select" data-i18n="langLabel">语言</label>
+      <select id="lang-select" class="lang-select"></select>
+    </div>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="blocked.js"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>任务解锁小红书</title>
+  <title data-i18n-title-key="appName">任务解锁小红书</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -11,15 +11,16 @@
     <header class="header">
       <div class="title-row">
         <img src="icons/icon48.png" alt="" class="logo">
-        <h1>任务解锁小红书</h1>
+        <h1 data-i18n="appName">任务解锁小红书</h1>
       </div>
-      <span id="badge" class="badge badge-locked">未解锁</span>
+      <span id="badge" class="badge badge-locked" data-i18n="badgeLocked">未解锁</span>
     </header>
 
     <section class="progress-card">
       <div class="progress-info">
-        <span id="progress-text">0 / 0 项已完成</span>
-        <button id="goal-btn" class="goal-btn" type="button" title="设置今日目标">目标：<span id="goal-value">0</span></button>
+        <span id="progress-text">0 / 0</span>
+        <button id="goal-btn" class="goal-btn" type="button" data-i18n-title="goalBtnTitle"><span
+            data-i18n="goalLabel">目标：</span><span id="goal-value">0</span></button>
       </div>
       <div class="progress-bar">
         <div id="progress-fill" class="progress-fill"></div>
@@ -28,27 +29,35 @@
     </section>
 
     <section class="add-section">
-      <input id="task-input" class="task-input" type="text" placeholder="添加一个今日任务，回车提交" maxlength="120">
-      <button id="add-btn" class="add-btn" type="button">添加</button>
+      <input id="task-input" class="task-input" type="text" data-i18n-placeholder="taskInputPlaceholder"
+        maxlength="120">
+      <button id="add-btn" class="add-btn" type="button" data-i18n="addBtn">添加</button>
     </section>
 
     <ul id="task-list" class="task-list"></ul>
-    <p id="empty-state" class="empty-state">还没有任务，先添加今天要完成的事情吧。</p>
+    <p id="empty-state" class="empty-state" data-i18n="emptyState">还没有任务，先添加今天要完成的事情吧。</p>
 
     <section class="history-section">
-      <button id="history-toggle" class="history-toggle" type="button">近 7 天打卡记录 ▾</button>
+      <!-- 文案由 updateHistoryToggleLabel() 按当前语言写入，留空避免闪一下错误语言 -->
+      <button id="history-toggle" class="history-toggle" type="button"></button>
       <ul id="history-list" class="history-list" hidden></ul>
     </section>
+
+    <footer class="footer">
+      <label class="lang-label" for="lang-select" data-i18n="langLabel">语言</label>
+      <select id="lang-select" class="lang-select"></select>
+    </footer>
   </div>
 
   <!-- 预览打卡截图用的遮罩层 -->
   <div id="preview-overlay" class="preview-overlay" hidden>
-    <img id="preview-img" class="preview-img" alt="打卡截图预览">
+    <img id="preview-img" class="preview-img" data-i18n-alt="previewAlt" alt="">
   </div>
 
   <!-- 上传打卡截图用的常驻 file input -->
   <input id="file-input" type="file" accept="image/*" hidden>
 
+  <script src="i18n.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

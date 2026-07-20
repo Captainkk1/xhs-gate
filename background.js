@@ -2,6 +2,9 @@
 // 负责：任务状态管理（增/删/勾选/设目标/按日期重置）+ 打卡截图存储（IndexedDB）
 // + 每日/每周结算通知 + 小红书导航拦截。
 
+// 通知文案要跟着用户选的语言走，所以 service worker 也引入同一份字典。
+importScripts('i18n.js');
+
 const STORAGE_KEY = 'xhsGateState';
 const HISTORY_KEY = 'xhsGateHistory';
 const WEEKLY_FLAG_KEY = 'xhsGateLastWeeklySettledDate';
@@ -118,11 +121,17 @@ async function settleDay(oldState) {
 
   await appendHistory({ date: oldState.date, goal, done, total, unlocked });
 
+  // 每次发通知前重新读一遍语言偏好，避免 service worker 缓存了旧值。
+  await I18N.init();
   chrome.notifications.create(`daily-${oldState.date}`, {
     type: 'basic',
     iconUrl: 'icons/icon128.png',
-    title: unlocked ? '✅ 昨日打卡结算：已达标' : '⚠️ 昨日打卡结算：未达标',
-    message: `${oldState.date} 完成 ${done}/${goal} 项任务${unlocked ? '，干得漂亮！' : '，明天继续加油～'}`,
+    title: I18N.t(unlocked ? 'dailyTitleOk' : 'dailyTitleFail'),
+    message: I18N.t(unlocked ? 'dailyMessageOk' : 'dailyMessageFail', {
+      date: oldState.date,
+      done,
+      goal
+    }),
     priority: 1
   });
 
@@ -153,11 +162,12 @@ async function maybeSettleWeek(weekEndDate) {
   const totalDone = weekEntries.reduce((sum, h) => sum + h.done, 0);
   const daysTracked = weekEntries.length;
 
+  await I18N.init();
   chrome.notifications.create(`weekly-${weekEndDate}`, {
     type: 'basic',
     iconUrl: 'icons/icon128.png',
-    title: '📅 本周打卡结算',
-    message: `本周共解锁 ${unlockedDays}/${daysTracked} 天，累计完成 ${totalDone} 项任务。`,
+    title: I18N.t('weeklyTitle'),
+    message: I18N.t('weeklyMessage', { unlockedDays, daysTracked, totalDone }),
     priority: 1
   });
 
@@ -283,7 +293,7 @@ async function handleMessage(msg) {
     }
 
     default:
-      return { error: `未知的消息类型: ${msg.type}` };
+      return { error: I18N.t('unknownMessageType', { type: msg.type }) };
   }
 }
 

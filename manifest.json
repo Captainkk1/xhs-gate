@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "任务解锁小红书",
-  "version": "1.0.0",
-  "description": "完成今日任务后才能访问小红书网页版。未达标时自动拦截，帮你在工作前不被打断。",
+  "name": "__MSG_appName__",
+  "version": "1.1.0",
+  "description": "__MSG_appDescription__",
+  "default_locale": "en",
   "permissions": [
     "storage",
     "webNavigation",
@@ -15,7 +16,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "任务解锁小红书",
+    "default_title": "__MSG_appName__",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
@@ -35,6 +36,7 @@
       "resources": [
         "blocked.html",
         "blocked.js",
+        "i18n.js",
         "icons/icon128.png"
       ],
       "matches": [

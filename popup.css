@@ -361,3 +361,36 @@ h1 {
   color: var(--text-muted);
   padding: 4px 0;
 }
+
+/* ---------- 底部语言切换 ---------- */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.lang-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.lang-select {
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.lang-select:hover {
+  border-color: var(--xhs-red);
+  color: var(--xhs-red);
+}

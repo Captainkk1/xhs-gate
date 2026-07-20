@@ -7,7 +7,8 @@ const el = {
   goal: document.getElementById('goal'),
   progressFill: document.getElementById('progress-fill'),
   refreshBtn: document.getElementById('refresh-btn'),
-  unlockedNote: document.getElementById('unlocked-note')
+  unlockedNote: document.getElementById('unlocked-note'),
+  langSelect: document.getElementById('lang-select')
 };
 
 function send(message) {
@@ -41,8 +42,13 @@ async function checkAndMaybeUnlock() {
 
 el.refreshBtn.addEventListener('click', checkAndMaybeUnlock);
 
-// 初始加载时刷新进度。
-checkAndMaybeUnlock();
+// 初始加载：先确定语言、翻译静态文案，再刷新进度。
+(async () => {
+  await I18N.init();
+  I18N.applyStatic();
+  I18N.mountSelect(el.langSelect);
+  checkAndMaybeUnlock();
+})();
 
 // 页面重新可见时也刷新一次进度（例如切回本标签页）。
 document.addEventListener('visibilitychange', () => {

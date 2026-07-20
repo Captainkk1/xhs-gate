@@ -15,11 +15,16 @@ const el = {
   historyList: document.getElementById('history-list'),
   previewOverlay: document.getElementById('preview-overlay'),
   previewImg: document.getElementById('preview-img'),
-  fileInput: document.getElementById('file-input')
+  fileInput: document.getElementById('file-input'),
+  langSelect: document.getElementById('lang-select')
 };
 
 // 当前正在等待上传截图的任务 id。
 let pendingTaskId = null;
+
+// 缓存最近一次渲染用的数据，切换语言时可以就地重绘，不用再问 background。
+let lastState = null;
+let lastHistory = null;
 
 function send(message) {
   return chrome.runtime.sendMessage(message);
@@ -32,7 +37,7 @@ function fileToResizedDataUrl(file, maxWidth = 800, quality = 0.8) {
     reader.onerror = () => reject(reader.error);
     reader.onload = () => {
       const img = new Image();
-      img.onerror = () => reject(new Error('图片加载失败'));
+      img.onerror = () => reject(new Error(I18N.t('imageLoadFailed')));
       img.onload = () => {
         const scale = Math.min(1, maxWidth / img.width);
         const w = Math.round(img.width * scale);
@@ -51,13 +56,14 @@ function fileToResizedDataUrl(file, maxWidth = 800, quality = 0.8) {
 
 function render(state) {
   if (!state || state.error) return;
+  lastState = state;
 
   const { done, total, goal, unlocked, tasks } = state;
 
-  el.badge.textContent = unlocked ? '已解锁' : '未解锁';
+  el.badge.textContent = I18N.t(unlocked ? 'badgeUnlocked' : 'badgeLocked');
   el.badge.className = `badge ${unlocked ? 'badge-unlocked' : 'badge-locked'}`;
 
-  el.progressText.textContent = `${done} / ${total} 项已完成`;
+  el.progressText.textContent = I18N.t('progressText', { done, total });
   el.goalValue.textContent = goal;
 
   const pct = goal > 0 ? Math.min(100, Math.round((done / goal) * 100)) : 0;
@@ -65,10 +71,10 @@ function render(state) {
   el.progressFill.style.background = unlocked ? 'var(--green)' : 'var(--xhs-red)';
 
   if (unlocked) {
-    el.hint.textContent = '🎉 已达标，现在可以访问小红书了。';
+    el.hint.textContent = I18N.t('hintUnlocked');
   } else {
     const remain = Math.max(0, goal - done);
-    el.hint.textContent = `再打卡完成 ${remain} 项即可解锁小红书（需上传截图凭证）。`;
+    el.hint.textContent = I18N.t('hintRemaining', { remain });
   }
 
   el.taskList.innerHTML = '';
@@ -95,15 +101,15 @@ function makeTaskItem(task) {
     // 已打卡：显示缩略图（点击可预览）+ 撤销按钮。
     const thumb = document.createElement('img');
     thumb.className = 'task-thumb';
-    thumb.alt = '打卡凭证';
+    thumb.alt = I18N.t('proofAlt');
     loadThumb(thumb, task.screenshotId);
     thumb.addEventListener('click', () => showPreview(task.screenshotId));
     li.appendChild(thumb);
 
     const undoBtn = document.createElement('button');
     undoBtn.className = 'undo-btn';
-    undoBtn.textContent = '撤销';
-    undoBtn.title = '撤销打卡（会删除已上传的截图）';
+    undoBtn.textContent = I18N.t('undoBtn');
+    undoBtn.title = I18N.t('undoBtnTitle');
     undoBtn.addEventListener('click', async () => {
       render(await send({ type: 'UNDO_TASK', id: task.id }));
     });
@@ -112,7 +118,7 @@ function makeTaskItem(task) {
     // 未打卡：显示"上传截图完成"按钮。
     const proofBtn = document.createElement('button');
     proofBtn.className = 'proof-btn';
-    proofBtn.textContent = '📷 打卡';
+    proofBtn.textContent = I18N.t('proofBtn');
     proofBtn.addEventListener('click', () => triggerUpload(task.id));
     li.appendChild(proofBtn);
   }
@@ -120,7 +126,7 @@ function makeTaskItem(task) {
   const del = document.createElement('button');
   del.className = 'delete-btn';
   del.textContent = '×';
-  del.title = '删除任务';
+  del.title = I18N.t('deleteBtnTitle');
   del.addEventListener('click', async () => {
     render(await send({ type: 'DELETE_TASK', id: task.id }));
   });
@@ -166,7 +172,7 @@ el.fileInput.addEventListener('change', async () => {
     const dataUrl = await fileToResizedDataUrl(file);
     render(await send({ type: 'COMPLETE_TASK', id: taskId, dataUrl }));
   } catch (e) {
-    window.alert('截图处理失败，请重试。');
+    window.alert(I18N.t('screenshotFailed'));
   } finally {
     el.fileInput.value = '';
   }
@@ -182,12 +188,18 @@ async function addTask() {
 
 // ---------- 近 7 天历史 ----------
 
+function updateHistoryToggleLabel() {
+  const arrow = el.historyList.hidden ? '▾' : '▴';
+  el.historyToggle.textContent = `${I18N.t('historyToggle')} ${arrow}`;
+}
+
 function renderHistory(history) {
+  lastHistory = history;
   el.historyList.innerHTML = '';
   if (!history || history.length === 0) {
     const empty = document.createElement('li');
     empty.className = 'history-empty';
-    empty.textContent = '暂无历史记录。';
+    empty.textContent = I18N.t('historyEmpty');
     el.historyList.appendChild(empty);
     return;
   }
@@ -201,7 +213,7 @@ function renderHistory(history) {
 
     const result = document.createElement('span');
     result.className = `history-result ${h.unlocked ? 'ok' : 'fail'}`;
-    result.textContent = `${h.done}/${h.goal} ${h.unlocked ? '✓ 达标' : '✗ 未达标'}`;
+    result.textContent = `${h.done}/${h.goal} ${I18N.t(h.unlocked ? 'historyPass' : 'historyFail')}`;
 
     li.append(date, result);
     el.historyList.appendChild(li);
@@ -209,10 +221,10 @@ function renderHistory(history) {
 }
 
 el.historyToggle.addEventListener('click', async () => {
-  const hidden = el.historyList.hidden;
-  el.historyList.hidden = !hidden;
-  el.historyToggle.textContent = hidden ? '近 7 天打卡记录 ▴' : '近 7 天打卡记录 ▾';
-  if (hidden) {
+  const wasHidden = el.historyList.hidden;
+  el.historyList.hidden = !wasHidden;
+  updateHistoryToggleLabel();
+  if (wasHidden) {
     const res = await send({ type: 'GET_HISTORY' });
     renderHistory(res && res.history);
   }
@@ -231,11 +243,11 @@ el.taskInput.addEventListener('keydown', (e) => {
 
 el.goalBtn.addEventListener('click', async () => {
   const current = el.goalValue.textContent;
-  const input = window.prompt('设置今日需要完成的任务数（目标）：', current);
+  const input = window.prompt(I18N.t('goalPrompt'), current);
   if (input === null) return;
   const goal = parseInt(input, 10);
   if (!Number.isFinite(goal) || goal < 1) {
-    window.alert('请输入一个不小于 1 的整数。');
+    window.alert(I18N.t('goalInvalid'));
     return;
   }
   render(await send({ type: 'SET_GOAL', goal }));
@@ -244,6 +256,16 @@ el.goalBtn.addEventListener('click', async () => {
 // ---------- 初始化 ----------
 
 (async () => {
+  await I18N.init();
+  I18N.applyStatic();
+  I18N.mountSelect(el.langSelect, () => {
+    // 切换语言后重绘动态内容（静态节点已由 applyStatic 处理）。
+    updateHistoryToggleLabel();
+    if (lastState) render(lastState);
+    if (!el.historyList.hidden) renderHistory(lastHistory);
+  });
+  updateHistoryToggleLabel();
+
   render(await send({ type: 'GET_STATE' }));
   el.taskInput.focus();
 })();
