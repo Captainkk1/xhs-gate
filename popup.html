@@ -34,6 +34,17 @@
       <button id="add-btn" class="add-btn" type="button" data-i18n="addBtn">添加</button>
     </section>
 
+    <section class="summary-section">
+      <!-- 文案由 updateSummaryToggleLabel() 按当前语言写入 -->
+      <button id="summary-toggle" class="history-toggle" type="button"></button>
+      <div id="summary-body" hidden>
+        <p class="summary-group-title" data-i18n="summaryDone">已完成</p>
+        <ul id="summary-done" class="summary-list"></ul>
+        <p class="summary-group-title" data-i18n="summaryTodo">未完成</p>
+        <ul id="summary-todo" class="summary-list"></ul>
+      </div>
+    </section>
+
     <ul id="task-list" class="task-list"></ul>
     <p id="empty-state" class="empty-state" data-i18n="emptyState">还没有任务，先添加今天要完成的事情吧。</p>
 

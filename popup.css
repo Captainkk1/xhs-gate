@@ -214,6 +214,35 @@ h1 {
   color: var(--text-muted);
 }
 
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 3px 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.edit-btn:hover {
+  color: var(--xhs-red);
+  background: #fff0f2;
+}
+
+.task-edit-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--xhs-red);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
 .delete-btn {
   background: none;
   border: none;
@@ -301,6 +330,46 @@ h1 {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
+/* ---------- 今日任务清单（折叠汇总） ---------- */
+
+.summary-section {
+  margin-top: -4px;
+}
+
+.summary-group-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 8px 0 4px;
+}
+
+.summary-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-item {
+  font-size: 12px;
+  background: var(--card);
+  border-radius: 8px;
+  padding: 6px 10px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.summary-item.done {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.summary-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 2px 0;
+}
+
 /* ---------- 近 7 天历史 ---------- */
 
 .history-section {
@@ -338,6 +407,41 @@ h1 {
   background: var(--card);
   border-radius: 8px;
   padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.history-item:hover {
+  background: #fff6f7;
+}
+
+/* 今天那一行来自实时状态，稍微标一下 */
+.history-item.today .history-date {
+  font-weight: 600;
+}
+
+.history-detail {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 10px 2px 18px;
+}
+
+.history-detail-item {
+  font-size: 12px;
+  color: var(--xhs-red);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.history-detail-item.done {
+  color: var(--green);
+}
+
+.history-detail-empty {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .history-date {

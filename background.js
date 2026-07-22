@@ -9,6 +9,8 @@ const STORAGE_KEY = 'xhsGateState';
 const HISTORY_KEY = 'xhsGateHistory';
 const WEEKLY_FLAG_KEY = 'xhsGateLastWeeklySettledDate';
 const DEFAULT_GOAL = 3;
+// 任务添加后多久内还能改文字。这是"改错字"的窗口，不是"重新谈条件"的窗口。
+const EDIT_WINDOW_MS = 5 * 60 * 1000;
 const ALARM_NAME = 'xhs-gate-daily-check';
 const HISTORY_MAX = 60;
 
@@ -119,7 +121,9 @@ async function settleDay(oldState) {
   const goal = oldState.goal;
   const unlocked = done >= goal && goal > 0;
 
-  await appendHistory({ date: oldState.date, goal, done, total, unlocked });
+  // items 只存任务文本和完成状态（不含截图），方便之后在面板里回看当天的任务明细。
+  const items = oldState.tasks.map((t) => ({ text: t.text, done: !!t.done }));
+  await appendHistory({ date: oldState.date, goal, done, total, unlocked, items });
 
   // 每次发通知前重新读一遍语言偏好，避免 service worker 缓存了旧值。
   await I18N.init();
@@ -183,7 +187,7 @@ async function loadState() {
   const today = todayStr();
 
   if (!state || typeof state !== 'object') {
-    state = { date: today, goal: DEFAULT_GOAL, tasks: [] };
+    state = { date: today, goal: DEFAULT_GOAL, goalDate: null, tasks: [] };
     await saveState(state);
     return state;
   }
@@ -193,6 +197,8 @@ async function loadState() {
     state = {
       date: today,
       goal: typeof state.goal === 'number' && state.goal > 0 ? state.goal : DEFAULT_GOAL,
+      // 新的一天可以重新定目标（包括调低），定完之后当天就只能往上加。
+      goalDate: null,
       tasks: []
     };
     await saveState(state);
@@ -217,7 +223,10 @@ function summarize(state) {
     tasks: state.tasks,
     done,
     total,
-    unlocked
+    unlocked,
+    // 面板据此判断哪些任务还能改、目标能不能调低（真正的校验仍在这里做）。
+    editWindowMs: EDIT_WINDOW_MS,
+    goalLockedToday: state.goalDate === state.date
   };
 }
 
@@ -233,9 +242,30 @@ async function handleMessage(msg) {
     case 'ADD_TASK': {
       const text = (msg.text || '').trim();
       if (text) {
-        state.tasks.push({ id: makeId(), text, done: false, screenshotId: null });
+        state.tasks.push({
+          id: makeId(),
+          text,
+          done: false,
+          screenshotId: null,
+          createdAt: Date.now()
+        });
         await saveState(state);
       }
+      return summarize(state);
+    }
+
+    // 改任务文字：只在添加后 5 分钟内、且还没打卡时允许。
+    // 已打卡的不能改——截图是对着那句话拍的，改了文字凭证就对不上了。
+    case 'EDIT_TASK': {
+      const text = (msg.text || '').trim();
+      const task = state.tasks.find((t) => t.id === msg.id);
+      if (!task || !text) return summarize(state);
+      if (task.done) return { ...summarize(state), editDenied: 'done' };
+      if (Date.now() - (task.createdAt || 0) > EDIT_WINDOW_MS) {
+        return { ...summarize(state), editDenied: 'expired' };
+      }
+      task.text = text;
+      await saveState(state);
       return summarize(state);
     }
 
@@ -273,12 +303,16 @@ async function handleMessage(msg) {
       return summarize(state);
     }
 
+    // 目标当天定下后只能调高，不能调低；第二天自动解锁重新设定。
     case 'SET_GOAL': {
       const goal = parseInt(msg.goal, 10);
-      if (Number.isFinite(goal) && goal >= 1) {
-        state.goal = goal;
-        await saveState(state);
+      if (!Number.isFinite(goal) || goal < 1) return summarize(state);
+      if (state.goalDate === state.date && goal < state.goal) {
+        return { ...summarize(state), goalDenied: true };
       }
+      state.goal = goal;
+      state.goalDate = state.date;
+      await saveState(state);
       return summarize(state);
     }
 
@@ -287,9 +321,22 @@ async function handleMessage(msg) {
       return { dataUrl: record ? record.dataUrl : null };
     }
 
+    // 返回近 7 天：已结算的 6 天 + 今天（今天还没结算，直接用当前状态拼一条，
+    // 这样当天的任务明细立刻可见，不用等到跨天）。
     case 'GET_HISTORY': {
       const history = await loadHistory();
-      return { history: history.slice(-7) };
+      const past = history.filter((h) => h.date !== state.date).slice(-6);
+      const s = summarize(state);
+      const today = {
+        date: s.date,
+        goal: s.goal,
+        done: s.done,
+        total: s.total,
+        unlocked: s.unlocked,
+        items: state.tasks.map((t) => ({ text: t.text, done: !!t.done })),
+        isToday: true
+      };
+      return { history: [...past, today] };
     }
 
     default:
